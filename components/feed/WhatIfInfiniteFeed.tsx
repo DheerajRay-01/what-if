@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import WhatIfCard from "@/components/what-if/WhatIfCard";
+import WhatIfFeedSkeleton from "../Skeleton/WhatIfFeedSkeleton";
 
 interface WhatIf {
   _id: string;
@@ -102,6 +103,12 @@ export default function WhatIfInfiniteFeed() {
       observer.disconnect();
     };
   }, [nextCursor, hasMore, fetchPosts]);
+
+  if (loading && posts.length === 0) {
+  return (
+    <WhatIfFeedSkeleton/>
+  );
+}
 
 return (
   <section>

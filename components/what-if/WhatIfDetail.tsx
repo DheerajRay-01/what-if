@@ -3,6 +3,7 @@
 import { MessageCircle, Share2 } from "lucide-react";
 import ReactionBar from "./ReactionBar";
 import Image from "next/image";
+import ShareButton from "../ShareButton";
 
 interface WhatIfDetailProps {
   whatIf: {
@@ -61,7 +62,7 @@ const WhatIfDetail = ({ whatIf }: WhatIfDetailProps) => {
         </div>
 
         {/* Share */}
-        <button
+        {/* <button
           type="button"
           className="group flex items-center gap-2 text-sm font-bold uppercase transition-transform hover:-translate-y-0.5"
         >
@@ -71,7 +72,8 @@ const WhatIfDetail = ({ whatIf }: WhatIfDetailProps) => {
             className="transition-transform group-hover:rotate-6"
           />
           <span>SPREAD CHAOS</span>
-        </button>
+        </button> */}
+        <ShareButton content={whatIf.content} replyCount={whatIf.replyCount} reactionCounts={whatIf.reactionCounts}/>
       </div>
 
       {/* Bottom hand-drawn mark */}

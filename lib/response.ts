@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export function ApiResponse(
+export function ApiResponse (
   status: boolean,
   code: number,
   data: unknown = null,
