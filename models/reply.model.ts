@@ -4,6 +4,7 @@ interface IReply {
   whatIfId: mongoose.Types.ObjectId;
   parentId: mongoose.Types.ObjectId | null;
   content: string;
+  replyCount: number;
   status: "active" | "deleted";
 }
 
@@ -25,7 +26,13 @@ const replySchema = new mongoose.Schema<IReply>(
       type: String,
       required: true,
       trim: true,
-      maxlength: 500,
+      maxlength: 280,
+    },
+
+    replyCount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
 
     status: {
@@ -39,9 +46,10 @@ const replySchema = new mongoose.Schema<IReply>(
   }
 );
 
-// Index for fetching replies with cursor pagination
+// Level 1 pagination + Level 2 fetching
 replySchema.index({
   whatIfId: 1,
+  parentId: 1,
   _id: -1,
 });
 

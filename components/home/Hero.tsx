@@ -1,6 +1,14 @@
 import WhatIfInput from "./WhatIfInput";
 
-export default function Hero() {
+interface HeroProps {
+  onSubmit: (content: string) => Promise<boolean>;
+  loading: boolean;
+}
+
+export default function Hero({
+  onSubmit,
+  loading,
+}: HeroProps) {
   return (
     <section className="flex min-h-[55vh] items-center justify-center px-4 py-14 sm:px-6 lg:px-8">
       <div className="w-full max-w-4xl text-center">
@@ -37,13 +45,15 @@ export default function Hero() {
               -right-3 -top-3
               z-10 h-5 w-12
               rotate-[-6deg]
-              border-t-2
-              border-dashed
+              border-t-2 border-dashed
               border-foreground
             "
           />
 
-          <WhatIfInput />
+          <WhatIfInput
+            onSubmit={onSubmit}
+            loading={loading}
+          />
         </div>
       </div>
     </section>

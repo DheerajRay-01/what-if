@@ -2,51 +2,30 @@
 
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { toast } from "sonner";
 import Image from "next/image";
 
-export default function WhatIfInput() {
+interface WhatIfInputProps {
+  onSubmit: (content: string) => Promise<boolean>;
+  loading: boolean;
+}
+
+export default function WhatIfInput({
+  onSubmit,
+  loading,
+}: WhatIfInputProps) {
   const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const submit = async () => {
     const trimmedContent = content.trim();
-    const finalContent = `What if ${trimmedContent.replace(/[?]+$/, "")}?`;
 
     if (!trimmedContent || loading) return;
 
-    try {
-      setLoading(true);
+    const finalContent = `What if ${trimmedContent.replace(/[?]+$/, "")}?`;
 
-      const res = await fetch("/api/what-if", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: finalContent,
-        }),
-      });
+    const success = await onSubmit(finalContent);
 
-      const data = await res.json();
-
-      if (!res.ok || !data.status) {
-        throw new Error(data.msg || "Failed to post What If");
-      }
-
+    if (success) {
       setContent("");
-
-      toast.success("Your What If escaped! 💥");
-    } catch (error) {
-      console.error("Failed to submit What If:", error);
-
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong"
-      );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -111,16 +90,12 @@ export default function WhatIfInput() {
           "
         />
 
-        {/* <span className="shrink-0 text-base font-bold sm:text-lg">
-          ?
-        </span> */}
-         <Image
-                  src="/emojis/question.svg"
-                  alt=""
-                  width={45}
-                  height={45}
-                  className="transition-transform group-hover:rotate-12"
-                />
+        <Image
+          src="/emojis/question.svg"
+          alt=""
+          width={45}
+          height={45}
+        />
 
         {/* Character count */}
         <span
@@ -136,8 +111,6 @@ export default function WhatIfInput() {
 
       {/* Submit */}
       <div className="mt-5 flex justify-center">
-        
-
         <button
           type="button"
           onClick={submit}
@@ -168,13 +141,13 @@ export default function WhatIfInput() {
             "THROWING..."
           ) : (
             <>
-               <Image
-                  src="/emojis/wastebasket.svg"
-                  alt=""
-                  width={25}
-                  height={25}
-                  className="transition-transform group-hover:rotate-12"
-                />
+              <Image
+                src="/emojis/wastebasket.svg"
+                alt=""
+                width={25}
+                height={25}
+                className="transition-transform group-hover:rotate-12"
+              />
 
               THROW IT OUT THERE
 
@@ -186,8 +159,6 @@ export default function WhatIfInput() {
                   group-hover:-translate-y-0.5
                 "
               />
-
-              
             </>
           )}
         </button>

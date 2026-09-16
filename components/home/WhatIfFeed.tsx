@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import WhatIfCard from "@/components/what-if/WhatIfCard";
 import Image from "next/image";
@@ -18,60 +17,29 @@ interface WhatIf {
   topComment: string | null;
 }
 
-interface ApiResponse {
-  status: boolean;
-  data: {
-    posts: WhatIf[];
-    nextCursor: string | null;
-    hasMore: boolean;
-  };
+interface WhatIfFeedProps {
+  posts: WhatIf[];
+  loading: boolean;
 }
 
-export default function WhatIfFeed() {
-  const [posts, setPosts] = useState<WhatIf[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchPosts = useCallback(async () => {
-    if (loading) return;
-
-    try {
-      setLoading(true);
-
-      const res = await fetch("/api/what-if");
-
-      const result: ApiResponse = await res.json();
-
-      if (!res.ok || !result.status) {
-        throw new Error("Failed to fetch What Ifs");
-      }
-
-      setPosts(result.data.posts);
-    } catch (error) {
-      console.error("Failed to fetch What Ifs:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [loading]);
-
-  // Initial fetch
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
+export default function WhatIfFeed({
+  posts,
+  loading,
+}: WhatIfFeedProps) {
   return (
     <section>
       {/* Feed Heading */}
       <div className="mb-6">
         <h2 className="text-xl font-black tracking-tight sm:text-2xl">
-              <Image
-                src="/emojis/loudly-crying-face.svg"
+          <Image
+            src="/emojis/loudly-crying-face.svg"
+            className="inline"
+            alt=""
+            width={45}
+            height={45}
+          />
 
-                className="inline"
-                alt=""
-                width={45}
-                height={45}
-              />
-           Why Did We Think Of This?
+          {" "}Why Did We Think Of This?
         </h2>
 
         <div
@@ -98,18 +66,29 @@ export default function WhatIfFeed() {
       )}
 
       {/* What If Feed */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {posts.map((post) => (
-          <WhatIfCard
-            key={post._id}
-            id={post._id}
-            content={post.content}
-            reactionCounts={post.reactionCounts}
-            replyCount={post.replyCount}
-            topComment={post.topComment ?? undefined}
-          />
-        ))}
-      </div>
+      {!loading && posts.length > 0 && (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {posts.map((post) => (
+            <WhatIfCard
+              key={post._id}
+              id={post._id}
+              content={post.content}
+              reactionCounts={post.reactionCounts}
+              replyCount={post.replyCount}
+              topComment={post.topComment ?? undefined}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && posts.length === 0 && (
+        <div className="flex min-h-40 items-center justify-center">
+          <p className="text-sm font-bold uppercase text-muted-foreground">
+            Nothing here yet. Someone needs to have a bad idea. 🤡
+          </p>
+        </div>
+      )}
 
       {/* View More */}
       {!loading && posts.length > 0 && (
@@ -133,15 +112,16 @@ export default function WhatIfFeed() {
               sm:text-base
             "
           >
-             <Image
-                src="/emojis/loudly-crying-face.svg"
+            <Image
+              src="/emojis/loudly-crying-face.svg"
+              className="inline"
+              alt=""
+              width={40}
+              height={40}
+            />
 
-                className="inline"
-                alt=""
-                width={40}
-                height={40}
-              />
-             THERE’S MORE?!
+            THERE’S MORE?!
+
             <span className="transition-transform group-hover:translate-x-1">
               →
             </span>

@@ -9,7 +9,6 @@ import { createReplySchema } from "@/lib/validations";
 
 
 
-// GET and POST reply
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -31,10 +30,12 @@ export async function GET(
     const query: {
       status: "active";
       whatIfId: mongoose.Types.ObjectId;
+      parentId: null;
       _id?: { $lt: mongoose.Types.ObjectId };
     } = {
       status: "active",
       whatIfId: new mongoose.Types.ObjectId(id),
+      parentId: null,
     };
 
     if (cursor) {
@@ -49,7 +50,9 @@ export async function GET(
 
     const replies = await Reply.find(query)
       .sort({ _id: -1 })
-      .limit(limit + 1);
+      .limit(limit + 1)
+      .select("_id content replyCount")
+     
 
     const hasMore = replies.length > limit;
 
@@ -60,6 +63,10 @@ export async function GET(
     const nextCursor = hasMore
       ? data[data.length - 1]._id.toString()
       : null;
+
+
+      console.log(data);
+      
 
     return ApiResponse(
       true,
@@ -72,7 +79,7 @@ export async function GET(
       "Replies fetched successfully"
     );
   } catch (error) {
-    console.error("Failed to fetch replies:", error);
+    console.error("Failed to fetch Level 1 replies:", error);
 
     return ApiResponse(
       false,
@@ -82,7 +89,6 @@ export async function GET(
     );
   }
 }
-
 
 // POST reply
 export async function POST(
@@ -94,6 +100,7 @@ export async function POST(
 
     const { id } = await params;
 
+    // Validate What If ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return ApiResponse(false, 400, null, "Invalid What If ID");
     }
@@ -114,7 +121,10 @@ export async function POST(
     const { content, parentId } = result.data;
 
     // Check What If
-    const whatIf = await WhatIf.findById(id);
+    const whatIf = await WhatIf.findOne({
+      _id: id,
+      status: "active",
+    }).select("_id");
 
     if (!whatIf) {
       return ApiResponse(
@@ -124,6 +134,8 @@ export async function POST(
         "What If not found"
       );
     }
+
+    let parentReply = null;
 
     // Check parent reply
     if (parentId) {
@@ -136,11 +148,14 @@ export async function POST(
         );
       }
 
-      const parentReply = await Reply.findOne({
+      // Parent MUST be a Level 1 reply.
+      // This prevents Level 3 replies.
+      parentReply = await Reply.findOne({
         _id: parentId,
         whatIfId: id,
+        parentId: null,
         status: "active",
-      });
+      }).select("_id");
 
       if (!parentReply) {
         return ApiResponse(
@@ -157,15 +172,34 @@ export async function POST(
       whatIfId: id,
       parentId: parentId || null,
       content,
+      replyCount: 0,
       status: "active",
     });
 
-    // Increase reply count
-    await WhatIf.findByIdAndUpdate(id, {
+    // Increase total reply count of What If
+    await WhatIf.updateOne(
+      { _id: id },
+      {
+        $inc: {
+          replyCount: 1,
+        },
+      }
+    );
+
+    // If Level 2, increase parent's reply count
+ if (parentReply) {
+  const updatedParent = await Reply.findByIdAndUpdate(
+    parentReply._id,
+    {
       $inc: {
         replyCount: 1,
       },
-    });
+    },
+    { new: true }
+  ).select("_id replyCount");
+
+  console.log("updatedParent",updatedParent);
+}
 
     return ApiResponse(
       true,
