@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface ShareButtonProps {
+    id: string;
   content: string;
   reactionCounts: {
     funny: number;
@@ -40,6 +41,7 @@ interface ShareButtonProps {
 }
 
 export default function ShareButton({
+    id,
   content,
   reactionCounts,
   replyCount,
@@ -173,11 +175,13 @@ export default function ShareButton({
         return;
       }
 
-      await navigator.share({
-        title: "What If…?",
-        text: content,
-        files: [file],
-      });
+    const url = `${process.env.NEXT_PUBLIC_APP_URL}/what-ifs/${id}`;
+
+await navigator.share({
+  title: "What If…?",
+  text: `${content}\n\n${url}`,
+  files: [file],
+});
     } catch (error) {
       if (
         error instanceof Error &&

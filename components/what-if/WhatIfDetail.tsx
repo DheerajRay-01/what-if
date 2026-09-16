@@ -73,7 +73,7 @@ const WhatIfDetail = ({ whatIf }: WhatIfDetailProps) => {
           />
           <span>SPREAD CHAOS</span>
         </button> */}
-        <ShareButton content={whatIf.content} replyCount={whatIf.replyCount} reactionCounts={whatIf.reactionCounts}/>
+        <ShareButton content={whatIf.content} replyCount={whatIf.replyCount} reactionCounts={whatIf.reactionCounts} id={whatIf._id}/>
       </div>
 
       {/* Bottom hand-drawn mark */}
