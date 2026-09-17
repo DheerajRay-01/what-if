@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/connectDB";
 import { ApiResponse } from "@/lib/response";
 import { createWhatIfSchema } from "@/lib/validations";
+import Reply from "@/models/reply.model";
 import WhatIf from "@/models/whatif.model";
 import mongoose, { Cursor } from "mongoose";
 import { Content } from "next/font/google";
@@ -64,6 +65,7 @@ export async function GET(request: Request) {
       status: "active",
     };
 
+    // 1. Validate cursor
     if (cursor) {
       if (!mongoose.Types.ObjectId.isValid(cursor)) {
         return ApiResponse(false, 400, null, "Invalid cursor");
@@ -74,96 +76,87 @@ export async function GET(request: Request) {
       };
     }
 
-    const posts = await WhatIf.aggregate([
-      // 1. Get active posts
-      {
-        $match: match,
-      },
+    // 2. Fetch posts
+    const posts = await WhatIf.find(match)
+      .sort({ _id: -1 })
+      .limit(limit + 1)
+      .lean();
 
-      // 2. Latest posts first
-      {
-        $sort: {
-          _id: -1,
-        },
-      },
-
-      // 3. Fetch latest top-level reply
-      {
-        $lookup: {
-          from: "replies",
-          let: { whatIfId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$whatIfId", "$$whatIfId"] },
-                    { $eq: ["$parentId", null] },
-                    { $eq: ["$status", "active"] },
-                  ],
-                },
-              },
-            },
-            {
-              $sort: {
-                createdAt: -1,
-              },
-            },
-            {
-              $limit: 1,
-            },
-            {
-              $project: {
-                _id: 0,
-                content: 1,
-              },
-            },
-          ],
-          as: "latestReply",
-        },
-      },
-
-      // 4. Get one extra to determine hasMore
-      {
-        $limit: limit + 1,
-      },
-
-      // 5. Convert reply array into single value
-      {
-        $set: {
-          topComment: {
-            $ifNull: [
-              { $arrayElemAt: ["$latestReply.content", 0] },
-              null,
-            ],
-          },
-        },
-      },
-
-      // 6. Remove temporary field
-      {
-        $project: {
-          latestReply: 0,
-        },
-      },
-    ]);
-
+    // 3. Check pagination
     const hasMore = posts.length > limit;
 
     const data = hasMore
       ? posts.slice(0, limit)
       : posts;
 
+    // 4. If no posts
+    if (data.length === 0) {
+      return ApiResponse(
+        true,
+        200,
+        {
+          posts: [],
+          nextCursor: null,
+          hasMore: false,
+        },
+        "Posts fetched successfully"
+      );
+    }
+
+    // 5. Get post IDs
+    const postIds = data.map((post) => post._id);
+
+    // 6. Fetch Level-1 replies
+    const replies = await Reply.find({
+      whatIfId: { $in: postIds },
+      parentId: null,
+      status: "active",
+    })
+      .sort({ createdAt: 1 })
+      .select("_id whatIfId content")
+      .lean();
+
+    // 7. Store first reply for each What If
+    const firstReplyMap = new Map<
+      string,
+      {
+        _id: mongoose.Types.ObjectId;
+        content: string;
+      }
+    >();
+
+    for (const reply of replies) {
+      const whatIfId = reply.whatIfId.toString();
+
+      if (!firstReplyMap.has(whatIfId)) {
+        firstReplyMap.set(whatIfId, {
+          _id: reply._id,
+          content: reply.content,
+        });
+      }
+    }
+
+    // 8. Merge first reply with posts
+    const mergedPosts = data.map((post) => ({
+      ...post,
+      topComment:
+        firstReplyMap.get(post._id.toString())?.content ?? null,
+    }));
+
+    // 9. Next cursor
     const nextCursor =
-      data.length > 0
-        ? data[data.length - 1]._id.toString()
+      mergedPosts.length > 0
+        ? mergedPosts[mergedPosts.length - 1]._id.toString()
         : null;
 
+    console.log("data:", mergedPosts);
+
+    // 10. Response
     return ApiResponse(
       true,
       200,
       {
-        posts: data,
+        posts: mergedPosts,
         nextCursor,
         hasMore,
       },
@@ -180,3 +173,7 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+
+
