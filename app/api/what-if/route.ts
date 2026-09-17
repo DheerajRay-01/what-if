@@ -5,6 +5,7 @@ import Reply from "@/models/reply.model";
 import WhatIf from "@/models/whatif.model";
 import mongoose, { Cursor } from "mongoose";
 import { Content } from "next/font/google";
+import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 
 // POST - create a What If
 export async function POST(request: Request) {
@@ -28,6 +29,9 @@ export async function POST(request: Request) {
       content: result.data.content,
     });
 
+    // Invalidate cached feed
+    revalidateTag("what-if-feed", "max");
+
     return ApiResponse(
       true,
       201,
@@ -48,73 +52,94 @@ export async function POST(request: Request) {
 
 
 // GET - fetch all What If
+async function getWhatIfs(cursor: string | null) {
+  "use cache";
+
+  cacheLife("minutes");
+  cacheTag("what-if-feed");
+
+  await connectDB();
+  
+
+  const limit = 10;
+
+  const match: {
+    status: "active";
+    _id?: { $lt: mongoose.Types.ObjectId };
+  } = {
+    status: "active",
+  };
+
+  // Validate cursor
+  if (cursor) {
+    match._id = {
+      $lt: new mongoose.Types.ObjectId(cursor),
+    };
+  }
+
+  // Fetch posts
+  const posts = await WhatIf.find(match)
+    .sort({ _id: -1 })
+    .limit(limit + 1)
+    .lean();
+
+  
+const plainPosts = posts.map((post) => ({
+  ...post,
+  _id: post._id.toString(),
+  createdAt: post.createdAt.toISOString(),
+  updatedAt: post.updatedAt.toISOString(),
+}));
+
+  // Pagination
+  const hasMore = plainPosts.length > limit;
+
+  const data = hasMore
+    ? plainPosts.slice(0, limit)
+    : plainPosts;
+
+  // No posts
+  if (data.length === 0) {
+    return {
+      posts: [],
+      nextCursor: null,
+      hasMore: false,
+    };
+  }
+
+  // Next cursor
+  const nextCursor =
+    data[data.length - 1]._id.toString();
+
+  return {
+    posts: data,
+    nextCursor,
+    hasMore,
+  };
+}
+
 export async function GET(request: Request) {
   try {
-    await connectDB();
-
     const { searchParams } = new URL(request.url);
 
     const cursor = searchParams.get("cursor");
-    const limit = 10;
 
-    const match: {
-      status: "active";
-      _id?: { $lt: mongoose.Types.ObjectId };
-    } = {
-      status: "active",
-    };
-
-    // 1. Validate cursor
-    if (cursor) {
-      if (!mongoose.Types.ObjectId.isValid(cursor)) {
-        return ApiResponse(false, 400, null, "Invalid cursor");
-      }
-
-      match._id = {
-        $lt: new mongoose.Types.ObjectId(cursor),
-      };
-    }
-
-    // 2. Fetch posts
-    const posts = await WhatIf.find(match)
-      .sort({ _id: -1 })
-      .limit(limit + 1)
-      .lean();
-
-    // 3. Check pagination
-    const hasMore = posts.length > limit;
-
-    const data = hasMore
-      ? posts.slice(0, limit)
-      : posts;
-
-    // 4. If no posts
-    if (data.length === 0) {
+    // Validate cursor
+    if (cursor && !mongoose.Types.ObjectId.isValid(cursor)) {
       return ApiResponse(
-        true,
-        200,
-        {
-          posts: [],
-          nextCursor: null,
-          hasMore: false,
-        },
-        "Posts fetched successfully"
+        false,
+        400,
+        null,
+        "Invalid cursor"
       );
     }
 
-    // 5. Next cursor
-    const nextCursor =
-      data[data.length - 1]._id.toString();
+    const data = await getWhatIfs(cursor);
 
-    // 6. Response
     return ApiResponse(
       true,
       200,
-      {
-        posts: data,
-        nextCursor,
-        hasMore,
-      },
+      data,
       "Posts fetched successfully"
     );
   } catch (error) {
@@ -128,6 +153,3 @@ export async function GET(request: Request) {
     );
   }
 }
-
-
-
