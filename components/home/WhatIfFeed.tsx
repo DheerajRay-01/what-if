@@ -61,7 +61,7 @@ export default function WhatIfFeed({
       {loading && posts.length === 0 && (
         <div className="flex min-h-40 items-center justify-center">
           <p className="text-sm font-medium text-muted-foreground">
-            Loading nonsense... 💩
+           Wait… almost there 👀
           </p>
         </div>
       )}
