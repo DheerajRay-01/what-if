@@ -20,7 +20,7 @@ export default function Hero({
             lg:text-6xl
           "
         >
-          WHAT IF…?
+          WHAT IF.. ?
         </h1>
 
         {/* Tagline */}

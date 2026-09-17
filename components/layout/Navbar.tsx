@@ -1,40 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { Share2 } from "lucide-react";
-import { toast } from "sonner";
+import { MessageCircle } from "lucide-react";
 
 export default function Navbar() {
-  const handleShare = async () => {
-    const url = window.location.origin;
-
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "What If…?",
-          text: "A place for stupid thoughts, crazy ideas, and terrible suggestions.",
-          url,
-        });
-      } else {
-        await navigator.clipboard.writeText(url);
-        toast.success("Link copied! Spread the nonsense. 💥");
-      }
-    } catch (error) {
-      // User closed the native share dialog
-      if ((error as Error).name !== "AbortError") {
-        toast.error("Couldn't share right now.");
-      }
-    }
-  };
-
   return (
     <header className="border-b-2 border-foreground">
       <nav
         className="
           mx-auto flex h-16 max-w-7xl
           items-center justify-between
-          px-4
-          sm:px-6
+          px-4 sm:px-6
         "
       >
         {/* Logo */}
@@ -48,35 +24,34 @@ export default function Navbar() {
             sm:text-xl
           "
         >
-          WHAT IF…?
+          WHAT IF..?
         </Link>
 
         {/* Navigation */}
         <div className="flex items-center gap-4 sm:gap-6">
           <Link
-            href="/about"
+            href="/what-ifs"
             className="
+              flex items-center gap-1.5
               text-sm font-semibold
               transition-transform
               hover:-rotate-1
             "
           >
-            About
+            <MessageCircle size={16} />
+            What Ifs
           </Link>
 
-          <button
-            type="button"
-            onClick={handleShare}
+          <Link
+            href="/about"
             className="
-              flex items-center gap-1.5
               text-sm font-semibold
               transition-transform
               hover:rotate-1
             "
           >
-            <Share2 size={16} />
-            Share
-          </button>
+            About
+          </Link>
         </div>
       </nav>
     </header>
