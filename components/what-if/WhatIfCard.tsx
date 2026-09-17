@@ -16,6 +16,7 @@ interface WhatIfCardProps {
   };
   replyCount: number;
   topComment?: string;
+  firstReplyLoading: boolean;
 }
 
 export default function WhatIfCard({
@@ -24,6 +25,7 @@ export default function WhatIfCard({
   reactionCounts,
   replyCount,
   topComment,
+  firstReplyLoading,
 }: WhatIfCardProps) {
   const router = useRouter();
 
@@ -89,59 +91,78 @@ export default function WhatIfCard({
       </p>
 
       {/* Worse Version */}
-      {topComment && (
+      {firstReplyLoading ? (
         <div
           className="
-            relative mt-4 block
+            relative mt-4
             border-2 border-foreground
             bg-muted/30
             p-3
-            transition-transform
-            group-hover:rotate-[0.2deg]
             sm:p-3.5
           "
         >
-          <span
-            aria-hidden="true"
+          <div className="h-4 w-28 animate-pulse bg-foreground/10" />
+
+          <div className="mt-3 space-y-2">
+            <div className="h-4 w-[90%] animate-pulse bg-foreground/10" />
+            <div className="h-4 w-[65%] animate-pulse bg-foreground/10" />
+          </div>
+        </div>
+      ) : (
+        topComment && (
+          <div
             className="
-              pointer-events-none absolute
-              -left-1 -top-1
-              h-2 w-8
-              rotate-[-3deg]
-              border-t
-              border-dashed
-              border-foreground
+              relative mt-4 block
+              border-2 border-foreground
+              bg-muted/30
+              p-3
+              transition-transform
+              group-hover:rotate-[0.2deg]
+              sm:p-3.5
             "
-          />
-
-          <p className="mb-1.5 text-xs font-bold uppercase tracking-wide">
-            <Image
-              src="/emojis/skull.svg"
-              alt=""
-              width={22}
-              height={22}
-              className="inline"
+          >
+            <span
+              aria-hidden="true"
+              className="
+                pointer-events-none absolute
+                -left-1 -top-1
+                h-2 w-8
+                rotate-[-3deg]
+                border-t
+                border-dashed
+                border-foreground
+              "
             />
-            {" "}WORSE VERSION
-          </p>
 
-          <p className="text-sm leading-snug sm:text-base">
-            “{topComment}”
-          </p>
-
-          {replyCount > 1 && (
-            <p className="mt-2 text-xs font-medium text-muted-foreground">
+            <p className="mb-1.5 text-xs font-bold uppercase tracking-wide">
               <Image
-                src="/emojis/clown.svg"
+                src="/emojis/skull.svg"
                 alt=""
                 width={22}
                 height={22}
                 className="inline"
               />
-              {" "}{replyCount} more nonsense →
+              {" "}WORSE VERSION
             </p>
-          )}
-        </div>
+
+            <p className="text-sm leading-snug sm:text-base">
+              “{topComment}”
+            </p>
+
+            {replyCount > 1 && (
+              <p className="mt-2 text-xs font-medium text-muted-foreground">
+                <Image
+                  src="/emojis/clown.svg"
+                  alt=""
+                  width={22}
+                  height={22}
+                  className="inline"
+                />
+                {" "}{replyCount} more nonsense →
+              </p>
+            )}
+          </div>
+        )
       )}
 
       {/* Bottom */}

@@ -48,7 +48,6 @@ export async function POST(request: Request) {
 
 
 // GET - fetch all What If
-
 export async function GET(request: Request) {
   try {
     await connectDB();
@@ -103,60 +102,16 @@ export async function GET(request: Request) {
       );
     }
 
-    // 5. Get post IDs
-    const postIds = data.map((post) => post._id);
-
-    // 6. Fetch Level-1 replies
-    const replies = await Reply.find({
-      whatIfId: { $in: postIds },
-      parentId: null,
-      status: "active",
-    })
-      .sort({ createdAt: 1 })
-      .select("_id whatIfId content")
-      .lean();
-
-    // 7. Store first reply for each What If
-    const firstReplyMap = new Map<
-      string,
-      {
-        _id: mongoose.Types.ObjectId;
-        content: string;
-      }
-    >();
-
-    for (const reply of replies) {
-      const whatIfId = reply.whatIfId.toString();
-
-      if (!firstReplyMap.has(whatIfId)) {
-        firstReplyMap.set(whatIfId, {
-          _id: reply._id,
-          content: reply.content,
-        });
-      }
-    }
-
-    // 8. Merge first reply with posts
-    const mergedPosts = data.map((post) => ({
-      ...post,
-      topComment:
-        firstReplyMap.get(post._id.toString())?.content ?? null,
-    }));
-
-    // 9. Next cursor
+    // 5. Next cursor
     const nextCursor =
-      mergedPosts.length > 0
-        ? mergedPosts[mergedPosts.length - 1]._id.toString()
-        : null;
+      data[data.length - 1]._id.toString();
 
-    console.log("data:", mergedPosts);
-
-    // 10. Response
+    // 6. Response
     return ApiResponse(
       true,
       200,
       {
-        posts: mergedPosts,
+        posts: data,
         nextCursor,
         hasMore,
       },
@@ -173,7 +128,6 @@ export async function GET(request: Request) {
     );
   }
 }
-
 
 
 

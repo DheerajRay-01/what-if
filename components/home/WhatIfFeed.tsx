@@ -15,6 +15,7 @@ interface WhatIf {
   };
   replyCount: number;
   topComment: string | null;
+  firstReplyLoading: boolean;
 }
 
 interface WhatIfFeedProps {
@@ -76,6 +77,7 @@ export default function WhatIfFeed({
               reactionCounts={post.reactionCounts}
               replyCount={post.replyCount}
               topComment={post.topComment ?? undefined}
+              firstReplyLoading={post.firstReplyLoading}
             />
           ))}
         </div>

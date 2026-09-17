@@ -15,8 +15,8 @@ interface WhatIf {
   };
   replyCount: number;
   topComment: string | null;
+  firstReplyLoading: boolean;
 }
-
 interface ApiResponse {
   status: boolean;
   data: {
@@ -54,11 +54,26 @@ export default function WhatIfInfiniteFeed() {
         throw new Error("Failed to fetch What Ifs");
       }
 
-      setPosts((prev) =>
-        cursor
-          ? [...prev, ...result.data.posts]
-          : result.data.posts
-      );
+      const fetchedPosts = result.data.posts;
+
+const postsWithLoading = fetchedPosts.map((post) => ({
+  ...post,
+  topComment: null,
+  firstReplyLoading: true,
+}));
+
+setPosts((prev) =>
+  cursor
+    ? [...prev, ...postsWithLoading]
+    : postsWithLoading
+);
+
+// Fetch first replies after posts are rendered
+const postIds = fetchedPosts.map(
+  (post) => post._id
+);
+
+fetchFirstReplies(postIds);
 
       setNextCursor(result.data.nextCursor);
       setHasMore(result.data.hasMore);
@@ -69,6 +84,48 @@ export default function WhatIfInfiniteFeed() {
       setLoading(false);
     }
   }, []);
+
+  const fetchFirstReplies = async (postIds: string[]) => {
+  if (postIds.length === 0) return;
+
+  try {
+    const response = await fetch(
+      `/api/what-if/first-replies?ids=${postIds.join(",")}`
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.status) {
+      throw new Error(
+        result.msg || "Failed to fetch first replies"
+      );
+    }
+
+    const firstReplies = result.data.firstReplies;
+
+    setPosts((prev) =>
+      prev.map((post) => ({
+        ...post,
+        topComment:
+          firstReplies[post._id]?.content ?? null,
+        firstReplyLoading: false,
+      }))
+    );
+  } catch (error) {
+    console.error(
+      "Failed to fetch first replies:",
+      error
+    );
+
+    // Important: don't leave skeletons forever
+    setPosts((prev) =>
+      prev.map((post) => ({
+        ...post,
+        firstReplyLoading: false,
+      }))
+    );
+  }
+};
 
   // Initial fetch
   useEffect(() => {
@@ -115,14 +172,15 @@ return (
     {/* What If Feed */}
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       {posts.map((post) => (
-        <WhatIfCard
-          key={post._id}
-          id={post._id}
-          content={post.content}
-          reactionCounts={post.reactionCounts}
-          replyCount={post.replyCount}
-          topComment={post.topComment ?? undefined}
-        />
+       <WhatIfCard
+  key={post._id}
+  id={post._id}
+  content={post.content}
+  reactionCounts={post.reactionCounts}
+  replyCount={post.replyCount}
+  topComment={post.topComment ?? undefined}
+  firstReplyLoading={post.firstReplyLoading}
+/>
       ))}
     </div>
 
