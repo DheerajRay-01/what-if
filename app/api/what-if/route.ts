@@ -3,7 +3,7 @@ import { ApiResponse } from "@/lib/response";
 import { createWhatIfSchema } from "@/lib/validations";
 import WhatIf from "@/models/whatif.model";
 import Reply from "@/models/reply.model";
-// console.log(Reply);
+console.log(Reply);
 import mongoose, { Cursor } from "mongoose";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 
