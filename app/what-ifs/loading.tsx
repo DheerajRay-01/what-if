@@ -1,4 +1,4 @@
-import WhatIfFeedSkeleton from '@/components/Skeleton/WhatIfFeedSkeleton'
+import WhatIfFeedSkeleton from '@/components/Skeleton/WhatIfCardSkeleton'
 import React from 'react'
 
 const loading = () => {

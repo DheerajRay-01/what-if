@@ -41,6 +41,7 @@ const useWhatIfs = () => {
 
     try {
       setLoading(true);
+      //  await new Promise((resolve) => setTimeout(resolve, 3000));
 
       const response = await fetch("/api/what-if");
 

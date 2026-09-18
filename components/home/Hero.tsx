@@ -10,7 +10,7 @@ export default function Hero({
   loading,
 }: HeroProps) {
   return (
-    <section className="flex min-h-[55vh] items-center justify-center px-4 py-14 sm:px-6 lg:px-8">
+    <section className="flex min-h-[55vh] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-4xl text-center">
         {/* Heading */}
         <h1

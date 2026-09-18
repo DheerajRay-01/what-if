@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import WhatIfCard from "@/components/what-if/WhatIfCard";
 import Image from "next/image";
+import WhatIfCard from "@/components/what-if/WhatIfCard";
+import FeedLoadingMessage from "../Skeleton/FeedLoadingMsg";
 
 interface WhatIf {
   _id: string;
@@ -29,6 +30,12 @@ export default function WhatIfFeed({
   posts,
   loading,
 }: WhatIfFeedProps) {
+
+  // 👇 Loading = whole feed gets replaced
+  if (loading && posts.length === 0) {
+    return <FeedLoadingMessage />;
+  }
+
   return (
     <section>
       {/* Feed Heading */}
@@ -59,15 +66,6 @@ export default function WhatIfFeed({
         />
       </div>
 
-      {/* Loading */}
-      {loading && posts.length === 0 && (
-        <div className="flex min-h-40 items-center justify-center">
-          <p className="text-sm font-medium text-muted-foreground">
-            Wait… almost there 👀
-          </p>
-        </div>
-      )}
-
       {/* What If Feed */}
       {!loading && posts.length > 0 && (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -87,7 +85,7 @@ export default function WhatIfFeed({
       {/* Empty State */}
       {!loading && posts.length === 0 && (
         <div className="flex min-h-40 items-center justify-center">
-          <p className="text-sm font-bold uppercase text-muted-foreground">
+          <p className="text-center text-sm font-bold uppercase text-muted-foreground">
             Nothing here yet. Someone needs to have a bad idea. 🤡
           </p>
         </div>

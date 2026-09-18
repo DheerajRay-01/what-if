@@ -50,6 +50,7 @@ export default function WhatIfInfiniteFeed() {
         : "/api/what-if";
 
       const res = await fetch(url);
+        //  await new Promise((resolve) => setTimeout(resolve, 3000));ty
 
       const result: ApiResponse = await res.json();
 
