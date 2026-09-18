@@ -12,6 +12,8 @@ interface IWhatIf {
 
   replyCount: number;
 
+  featuredReply: mongoose.Types.ObjectId | null;
+
   status: "active" | "deleted";
 }
 
@@ -48,6 +50,12 @@ const whatIfSchema = new mongoose.Schema<IWhatIf>(
       default: 0,
     },
 
+    featuredReply: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Reply",
+      default: null,
+    },
+
     status: {
       type: String,
       enum: ["active", "deleted"],
@@ -58,7 +66,6 @@ const whatIfSchema = new mongoose.Schema<IWhatIf>(
     timestamps: true,
   }
 );
-
 
 whatIfSchema.index({
   status: 1,

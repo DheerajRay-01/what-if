@@ -14,8 +14,10 @@ interface WhatIf {
     build: number;
   };
   replyCount: number;
-  topComment: string | null;
-  firstReplyLoading: boolean;
+  featuredReply: {
+    _id: string;
+    content: string;
+  } | null;
 }
 
 interface WhatIfFeedProps {
@@ -61,7 +63,7 @@ export default function WhatIfFeed({
       {loading && posts.length === 0 && (
         <div className="flex min-h-40 items-center justify-center">
           <p className="text-sm font-medium text-muted-foreground">
-           Wait… almost there 👀
+            Wait… almost there 👀
           </p>
         </div>
       )}
@@ -76,8 +78,7 @@ export default function WhatIfFeed({
               content={post.content}
               reactionCounts={post.reactionCounts}
               replyCount={post.replyCount}
-              topComment={post.topComment ?? undefined}
-              firstReplyLoading={post.firstReplyLoading}
+              featuredReply={post.featuredReply}
             />
           ))}
         </div>

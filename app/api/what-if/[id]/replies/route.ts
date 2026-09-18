@@ -170,7 +170,7 @@ export async function POST(
     // Create reply
     const reply = await Reply.create({
       whatIfId: id,
-      parentId: parentId || null,
+      parentId,
       content,
       replyCount: 0,
       status: "active",
@@ -186,20 +186,29 @@ export async function POST(
       }
     );
 
-    // If Level 2, increase parent's reply count
- if (parentReply) {
-  const updatedParent = await Reply.findByIdAndUpdate(
-    parentReply._id,
-    {
-      $inc: {
-        replyCount: 1,
-      },
-    },
-    { new: true }
-  ).select("_id replyCount");
+    // First top-level reply becomes featured
+    if (parentId === null) {
+      await WhatIf.findOneAndUpdate(
+        {
+          _id: id,
+          featuredReply: null,
+        },
+        {
+          $set: {
+            featuredReply: reply._id,
+          },
+        }
+      );
+    }
 
-  console.log("updatedParent",updatedParent);
-}
+    // If Level 2, increase parent's reply count
+    if (parentReply) {
+      await Reply.findByIdAndUpdate(parentReply._id, {
+        $inc: {
+          replyCount: 1,
+        },
+      });
+    }
 
     return ApiResponse(
       true,

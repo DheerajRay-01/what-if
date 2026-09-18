@@ -15,16 +15,15 @@ export const createReactionSchema = z.object({
     "crazy",
     "build",
   ]),
-
   visitorId: z.string().min(1, "Session ID is required"),
 });
 
 export const createReplySchema = z.object({
-parentId: z.string().nullable().optional(),
+  parentId: z.string().nullable().default(null),
 
   content: z
     .string()
     .trim()
     .min(1, "Reply cannot be empty")
-    .max(500, "Reply cannot be more than 500 characters"),
+    .max(280, "Reply cannot be more than 280 characters"),
 });

@@ -14,9 +14,12 @@ interface WhatIf {
     build: number;
   };
   replyCount: number;
-  topComment: string | null;
-  firstReplyLoading: boolean;
+  featuredReply: {
+    _id: string;
+    content: string;
+  } | null;
 }
+
 interface ApiResponse {
   status: boolean;
   data: {
@@ -56,24 +59,21 @@ export default function WhatIfInfiniteFeed() {
 
       const fetchedPosts = result.data.posts;
 
-const postsWithLoading = fetchedPosts.map((post) => ({
-  ...post,
-  topComment: null,
-  firstReplyLoading: true,
-}));
+      setPosts((prev) => {
+        if (!cursor) {
+          return fetchedPosts;
+        }
 
-setPosts((prev) =>
-  cursor
-    ? [...prev, ...postsWithLoading]
-    : postsWithLoading
-);
+        const existingIds = new Set(
+          prev.map((post) => post._id)
+        );
 
-// Fetch first replies after posts are rendered
-const postIds = fetchedPosts.map(
-  (post) => post._id
-);
+        const newPosts = fetchedPosts.filter(
+          (post) => !existingIds.has(post._id)
+        );
 
-fetchFirstReplies(postIds);
+        return [...prev, ...newPosts];
+      });
 
       setNextCursor(result.data.nextCursor);
       setHasMore(result.data.hasMore);
@@ -84,48 +84,6 @@ fetchFirstReplies(postIds);
       setLoading(false);
     }
   }, []);
-
-  const fetchFirstReplies = async (postIds: string[]) => {
-  if (postIds.length === 0) return;
-
-  try {
-    const response = await fetch(
-      `/api/what-if/first-replies?ids=${postIds.join(",")}`
-    );
-
-    const result = await response.json();
-
-    if (!response.ok || !result.status) {
-      throw new Error(
-        result.msg || "Failed to fetch first replies"
-      );
-    }
-
-    const firstReplies = result.data.firstReplies;
-
-    setPosts((prev) =>
-      prev.map((post) => ({
-        ...post,
-        topComment:
-          firstReplies[post._id]?.content ?? null,
-        firstReplyLoading: false,
-      }))
-    );
-  } catch (error) {
-    console.error(
-      "Failed to fetch first replies:",
-      error
-    );
-
-    // Important: don't leave skeletons forever
-    setPosts((prev) =>
-      prev.map((post) => ({
-        ...post,
-        firstReplyLoading: false,
-      }))
-    );
-  }
-};
 
   // Initial fetch
   useEffect(() => {
@@ -162,45 +120,42 @@ fetchFirstReplies(postIds);
   }, [nextCursor, hasMore, fetchPosts]);
 
   if (loading && posts.length === 0) {
+    return <WhatIfFeedSkeleton />;
+  }
+
   return (
-    <WhatIfFeedSkeleton/>
+    <section>
+      {/* What If Feed */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {posts.map((post) => (
+          <WhatIfCard
+            key={post._id}
+            id={post._id}
+            content={post.content}
+            reactionCounts={post.reactionCounts}
+            replyCount={post.replyCount}
+            featuredReply={post.featuredReply}
+          />
+        ))}
+      </div>
+
+      {/* Infinite Scroll Trigger */}
+      <div
+        ref={observerRef}
+        className="flex min-h-20 items-center justify-center"
+      >
+        {loading && (
+          <p className="text-sm font-medium text-muted-foreground">
+            Loading more nonsense... 💩
+          </p>
+        )}
+
+        {!loading && !hasMore && posts.length > 0 && (
+          <p className="text-sm font-medium text-muted-foreground">
+            You&apos;ve reached the bottom of the nonsense. 💀
+          </p>
+        )}
+      </div>
+    </section>
   );
-}
-
-return (
-  <section>
-    {/* What If Feed */}
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      {posts.map((post) => (
-       <WhatIfCard
-  key={post._id}
-  id={post._id}
-  content={post.content}
-  reactionCounts={post.reactionCounts}
-  replyCount={post.replyCount}
-  topComment={post.topComment ?? undefined}
-  firstReplyLoading={post.firstReplyLoading}
-/>
-      ))}
-    </div>
-
-    {/* Infinite Scroll Trigger */}
-    <div
-      ref={observerRef}
-      className="flex min-h-20 items-center justify-center"
-    >
-      {loading && (
-        <p className="text-sm font-medium text-muted-foreground">
-          Loading more nonsense... 💩
-        </p>
-      )}
-
-      {!loading && !hasMore && posts.length > 0 && (
-        <p className="text-sm font-medium text-muted-foreground">
-          You&apos;ve reached the bottom of the nonsense. 💀
-        </p>
-      )}
-    </div>
-  </section>
-);
 }

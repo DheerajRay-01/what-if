@@ -1,11 +1,13 @@
 import { connectDB } from "@/lib/connectDB";
 import { ApiResponse } from "@/lib/response";
 import { createWhatIfSchema } from "@/lib/validations";
-import Reply from "@/models/reply.model";
 import WhatIf from "@/models/whatif.model";
+import Reply from "@/models/reply.model";
+// console.log(Reply);
 import mongoose, { Cursor } from "mongoose";
-import { Content } from "next/font/google";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
+
+
 
 // POST - create a What If
 export async function POST(request: Request) {
@@ -59,7 +61,8 @@ async function getWhatIfs(cursor: string | null) {
   cacheTag("what-if-feed");
 
   await connectDB();
-  
+
+  console.log("Reply model:", mongoose.models.Reply);
 
   const limit = 10;
 
@@ -77,16 +80,27 @@ async function getWhatIfs(cursor: string | null) {
     };
   }
 
+
   // Fetch posts
   const posts = await WhatIf.find(match)
     .sort({ _id: -1 })
     .limit(limit + 1)
+    .populate("featuredReply", "_id content")
     .lean();
 
-  
+
+
 const plainPosts = posts.map((post) => ({
   ...post,
   _id: post._id.toString(),
+
+  featuredReply: post.featuredReply
+    ? {
+        _id: post.featuredReply._id.toString(),
+        content: post.featuredReply.content,
+      }
+    : null,
+
   createdAt: post.createdAt.toISOString(),
   updatedAt: post.updatedAt.toISOString(),
 }));
@@ -106,6 +120,7 @@ const plainPosts = posts.map((post) => ({
       hasMore: false,
     };
   }
+
 
   // Next cursor
   const nextCursor =

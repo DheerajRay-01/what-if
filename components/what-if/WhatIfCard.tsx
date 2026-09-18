@@ -15,8 +15,10 @@ interface WhatIfCardProps {
     build: number;
   };
   replyCount: number;
-  topComment?: string;
-  firstReplyLoading: boolean;
+  featuredReply: {
+    _id: string;
+    content: string;
+  } | null;
 }
 
 export default function WhatIfCard({
@@ -24,8 +26,7 @@ export default function WhatIfCard({
   content,
   reactionCounts,
   replyCount,
-  topComment,
-  firstReplyLoading,
+  featuredReply,
 }: WhatIfCardProps) {
   const router = useRouter();
 
@@ -90,80 +91,89 @@ export default function WhatIfCard({
         {content}
       </p>
 
-      {/* Worse Version */}
-      {firstReplyLoading ? (
-        <div
-          className="
-            relative mt-4
-            border-2 border-foreground
-            bg-muted/30
-            p-3
-            sm:p-3.5
-          "
-        >
-          <div className="h-4 w-28 animate-pulse bg-foreground/10" />
+      {/* Featured Reply */}
+      {/* Featured Reply */}
+{featuredReply ? (
+  <div
+    className="
+      relative mt-4 block
+      border-2 border-foreground
+      bg-muted/30
+      p-3
+      transition-transform
+      group-hover:rotate-[0.2deg]
+      sm:p-3.5
+    "
+  >
+    <span
+      aria-hidden="true"
+      className="
+        pointer-events-none absolute
+        -left-1 -top-1
+        h-2 w-8
+        rotate-[-3deg]
+        border-t
+        border-dashed
+        border-foreground
+      "
+    />
 
-          <div className="mt-3 space-y-2">
-            <div className="h-4 w-[90%] animate-pulse bg-foreground/10" />
-            <div className="h-4 w-[65%] animate-pulse bg-foreground/10" />
-          </div>
-        </div>
-      ) : (
-        topComment && (
-          <div
-            className="
-              relative mt-4 block
-              border-2 border-foreground
-              bg-muted/30
-              p-3
-              transition-transform
-              group-hover:rotate-[0.2deg]
-              sm:p-3.5
-            "
-          >
-            <span
-              aria-hidden="true"
-              className="
-                pointer-events-none absolute
-                -left-1 -top-1
-                h-2 w-8
-                rotate-[-3deg]
-                border-t
-                border-dashed
-                border-foreground
-              "
-            />
+    <p className="mb-1.5 text-xs font-bold uppercase tracking-wide">
+      <Image
+        src="/emojis/skull.svg"
+        alt=""
+        width={22}
+        height={22}
+        className="inline"
+      />
+      {" "}WORSE VERSION
+    </p>
 
-            <p className="mb-1.5 text-xs font-bold uppercase tracking-wide">
-              <Image
-                src="/emojis/skull.svg"
-                alt=""
-                width={22}
-                height={22}
-                className="inline"
-              />
-              {" "}WORSE VERSION
-            </p>
+    <p className="text-sm leading-snug sm:text-base">
+      “{featuredReply.content}”
+    </p>
 
-            <p className="text-sm leading-snug sm:text-base">
-              “{topComment}”
-            </p>
+    {replyCount > 1 && (
+      <p className="mt-2 text-xs font-medium text-muted-foreground">
+        <Image
+          src="/emojis/clown.svg"
+          alt=""
+          width={22}
+          height={22}
+          className="inline"
+        />
+        {" "}{replyCount - 1} more nonsense →
+      </p>
+    )}
+  </div>
+) : (
+  <div
+    className="
+      relative mt-4
+      border-2 border-dashed border-foreground/40
+      bg-muted/20
+      p-3.5
+      transition-transform
+      group-hover:rotate-[0.2deg]
+      sm:p-4
+    "
+  >
+    <p className="text-sm font-black uppercase">
+      <Image
+        src="/emojis/clown.svg"
+        alt=""
+        width={22}
+        height={22}
+        className="inline"
+      />
+      {" "}BE THE FIRST TO MAKE IT WORSE →
+    </p>
 
-            {replyCount > 1 && (
-              <p className="mt-2 text-xs font-medium text-muted-foreground">
-                <Image
-                  src="/emojis/clown.svg"
-                  alt=""
-                  width={22}
-                  height={22}
-                  className="inline"
-                />
-                {" "}{replyCount} more nonsense →
-              </p>
-            )}
-          </div>
-        )
-      )}
+    <p className="mt-1 text-xs font-medium text-muted-foreground">
+      This idea is still innocent. Fix that.
+    </p>
+  </div>
+)}
 
       {/* Bottom */}
       <div className="mt-auto pt-5">
