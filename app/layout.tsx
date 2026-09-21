@@ -4,6 +4,7 @@ import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/layout/Navbar";
 import { Toaster } from "sonner";
+import { Suspense } from "react";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -83,7 +84,23 @@ const metadata: Metadata = {
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body>
-        <Navbar/>
+        <Suspense
+  fallback={
+    <header className="border-b-2 border-foreground">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <div className="h-6 w-28 animate-pulse bg-muted" />
+
+        <div className="flex items-center gap-4 sm:gap-6">
+          <div className="h-5 w-24 animate-pulse bg-muted" />
+          <div className="h-5 w-10 animate-pulse bg-muted" />
+          <div className="h-9 w-16 animate-pulse bg-muted" />
+        </div>
+      </nav>
+    </header>
+  }
+>
+  <Navbar />
+</Suspense>
         <main>{children}</main>
         <Toaster />
       </body>

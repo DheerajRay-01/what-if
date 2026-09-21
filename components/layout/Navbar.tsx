@@ -1,9 +1,10 @@
-"use client";
-
 import Link from "next/link";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, SquareUserIcon } from "lucide-react";
+import { auth } from "@/auth";
 
-export default function Navbar() {
+export default async function Navbar() {
+  const session = await auth();
+
   return (
     <header className="border-b-2 border-foreground">
       <nav
@@ -38,8 +39,8 @@ export default function Navbar() {
               hover:-rotate-1
             "
           >
-            <MessageCircle size={16} />
-            What Ifs
+            {/* <MessageCircle size={16} strokeWidth={2} /> */}
+            Brain Dump
           </Link>
 
           <Link
@@ -50,8 +51,43 @@ export default function Navbar() {
               hover:rotate-1
             "
           >
-            About
+            Why?
           </Link>
+
+          {/* Profile / Login */}
+          {session?.user ? (
+            <Link
+              href="/profile"
+              className="
+                text-sm font-semibold
+                transition-transform
+                hover:rotate-1
+              "
+            >
+              <SquareUserIcon/>
+            </Link>
+          ) : (
+
+        <Link
+  href="/login"
+  className="
+    border-2 border-foreground
+    bg-foreground
+    px-2 py-1
+    text-sm font-black
+    text-background
+    shadow-[3px_3px_0px_0px_currentColor]
+    transition-all duration-150
+    hover:translate-x-[2px]
+    hover:translate-y-[2px]
+    hover:shadow-none
+    active:translate-x-[3px]
+    active:translate-y-[3px]
+  "
+>
+  Login
+</Link>
+          )}
         </div>
       </nav>
     </header>
