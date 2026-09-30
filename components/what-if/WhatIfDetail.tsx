@@ -4,10 +4,16 @@ import { MessageCircle, Share2 } from "lucide-react";
 import ReactionBar from "./ReactionBar";
 import Image from "next/image";
 import ShareButton from "../ShareButton";
+import Link from "next/link";
 
 interface WhatIfDetailProps {
   whatIf: {
     _id: string;
+    postId:string;
+    authorId: {
+      displayName: string;
+      publicId: string;
+    } | null;
     content: string;
     reactionCounts: {
       funny: number;
@@ -32,6 +38,29 @@ const WhatIfDetail = ({ whatIf }: WhatIfDetailProps) => {
       <h1 className="text-3xl font-bold leading-[1.1] tracking-tight md:text-[38px]">
         {whatIf.content}
       </h1>
+
+      {whatIf.authorId && (
+  <div className="mt-3 flex justify-end">
+    <Link
+      href={`/what-ifs?author=${whatIf.authorId.publicId}`}
+      className="
+        text-sm font-bold
+        text-foreground
+        underline decoration-dashed
+        underline-offset-4
+        transition-transform
+        hover:-rotate-1
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-foreground
+        focus-visible:ring-offset-2
+      "
+    >
+      @{whatIf.authorId.displayName}
+      <span className="ml-1 text-muted-foreground">↗</span>
+    </Link>
+  </div>
+)}
 
       {/* Divider */}
       <div className="my-6 border-t-2 border-dashed border-black/25" />

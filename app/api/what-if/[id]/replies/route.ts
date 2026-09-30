@@ -6,6 +6,8 @@ import mongoose from "mongoose";
 import { ApiResponse } from "@/lib/response";
 import WhatIf from "@/models/whatif.model";
 import { createReplySchema } from "@/lib/validations";
+import { auth } from "@/auth";
+import User from "@/models/user.model";
 
 
 
@@ -52,6 +54,7 @@ export async function GET(
       .sort({ _id: -1 })
       .limit(limit + 1)
       .select("_id content replyCount")
+      .populate("authorId", "_id displayName")
      
 
     const hasMore = replies.length > limit;
@@ -95,6 +98,12 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+
+  const session = await auth();
+
+if (!session?.user?.email) {
+  return ApiResponse(false, 401, null, "Unauthorized");
+}
   try {
     await connectDB();
 
@@ -119,6 +128,11 @@ export async function POST(
     }
 
     const { content, parentId } = result.data;
+
+    const user = await User.findOne({
+  email: session.user.email,
+  status: "active",
+}).select("_id");
 
     // Check What If
     const whatIf = await WhatIf.findOne({
@@ -170,6 +184,7 @@ export async function POST(
     // Create reply
     const reply = await Reply.create({
       whatIfId: id,
+       authorId: user._id,
       parentId,
       content,
       replyCount: 0,

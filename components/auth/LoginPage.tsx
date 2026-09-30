@@ -1,8 +1,7 @@
 import Image from "next/image";
-import AnimatedCharacter from "./AnimatedCharacter";
-import { LogIn } from "lucide-react";
 import { signIn } from "@/auth";
-// import { signIn } from "next-auth/react";
+import AnimatedCharacter from "../animCharacter/AnimatedCharacter";
+
 
 export default function LoginPage() {
 
@@ -79,20 +78,20 @@ export default function LoginPage() {
         </div>
 
         {/* Animated character */}
-        <AnimatedCharacter />
+        <AnimatedCharacter path="/animations/login-page-animation.lottie"/>
 
         {/* Google button */}
 
-  <form
+        <form
           action={async () => {
             "use server";
 
             await signIn("google", { redirectTo: "/finding-you" })
           }}
-        >       
-   <button
-   type="submit"
-  className="
+        >
+          <button
+            type="submit"
+            className="
     group
     relative
     mx-auto mt-4
@@ -111,10 +110,10 @@ export default function LoginPage() {
     active:translate-y-1
     active:shadow-none
   "
->
-  {/* Small card-style decoration */}
-  <span
-    className="
+          >
+            {/* Small card-style decoration */}
+            <span
+              className="
       absolute
       -right-2
       -top-2
@@ -125,30 +124,30 @@ export default function LoginPage() {
       border-dashed
       border-foreground
     "
-  />
+            />
 
-    <Image
-    src="/emojis/google.svg"
-    alt=""
-    width={30}
-    height={30}
-    className="shrink-0"
-  />
+            <Image
+              src="/emojis/google.svg"
+              alt=""
+              width={30}
+              height={30}
+              className="shrink-0"
+            />
 
-  <span>Continue with Google</span>
+            <span>Continue with Google</span>
 
-  <span
-    className="
+            <span
+              className="
       text-base
       transition-transform
       duration-150
       group-hover:translate-x-1
     "
-  >
-    →
-  </span>
-</button>
-</form>
+            >
+              →
+            </span>
+          </button>
+        </form>
 
         {/* Privacy */}
         <p className="mt-3 text-sm text-muted-foreground">

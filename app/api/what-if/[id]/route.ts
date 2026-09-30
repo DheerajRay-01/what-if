@@ -5,23 +5,16 @@ import mongoose from "mongoose";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
     await connectDB();
 
-    const { id } = await params;
+    const { postId } = await params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return ApiResponse(
-        false,
-        400,
-        null,
-        "Invalid ID"
-      );
-    }
-
-    const whatIf = await WhatIf.findById(id);
+    
+    const whatIf = await WhatIf.findOne({postId}).populate("authorId", "_id displayName")
+                            
 
     if (!whatIf) {
       return ApiResponse(

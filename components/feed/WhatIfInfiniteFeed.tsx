@@ -6,7 +6,12 @@ import WhatIfFeedSkeleton from "../Skeleton/WhatIfFeedSkeleton";
 
 interface WhatIf {
   _id: string;
+  authorId: {
+    displayName: string;
+    publicId: string;
+  } | null;
   content: string;
+  postId:string;
   reactionCounts: {
     funny: number;
     interesting: number;
@@ -132,6 +137,8 @@ export default function WhatIfInfiniteFeed() {
           <WhatIfCard
             key={post._id}
             id={post._id}
+            postId={post.postId}
+            author={post.authorId  ?? { displayName: "Unknown", publicId: "" } }
             content={post.content}
             reactionCounts={post.reactionCounts}
             replyCount={post.replyCount}

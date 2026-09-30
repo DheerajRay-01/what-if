@@ -78,7 +78,8 @@ export async function GET(
     const replies = await Reply.find(query)
       .sort({ _id: -1 })
       .limit(limit + 1)
-      .select("_id content");
+      .select("_id content")
+      .populate("authorId", "_id displayName")
 
     const hasMore = replies.length > limit;
 

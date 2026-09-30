@@ -4,22 +4,22 @@ import { generatePublicId } from "@/lib/generatePublicID";
 import { ApiResponse } from "@/lib/response";
 import User from "@/models/user.model";
 
-export async function GET() {
+export  async function GET(request:Request) {
+
+  const session  = await auth()
+  console.log(session);
+
+  if(!session?.user){
+     return ApiResponse(false, 401, null, "Unauthorized");
+  }
+
   try {
-    const session = await auth();
+   await connectDB()
 
-    if (!session?.user?.id || !session.user.email) {
-      return ApiResponse(false, 401, null, "Unauthorized");
-    }
-
-    await connectDB();
-
-    const user = await User.findOne({
-      email: session.user.email,
-      status: "active",
-    }).select("_id displayName publicId email name");
-
-    if (!user) {
+   const user = await User.findOne({email:session.user.email, status: "active"})
+                          .select("_id displayName publicId email name")
+    
+          if (!user) {
       return ApiResponse(true, 200, null, "User not found");
     }
 
@@ -35,16 +35,23 @@ export async function GET() {
       },
       "User found",
     );
+    
   } catch (error) {
-    console.error("Get user error:", error);
+     console.error("Get user error:", error);
 
     return ApiResponse(false, 500, null, "Failed to get user");
   }
+
+  
+  
 }
 
 export async function POST(request: Request) {
   try {
     const session = await auth();
+
+    console.log("session : ",session);
+    
 
     if (!session?.user?.id || !session.user.email) {
       return ApiResponse(false, 401, null, "Unauthorized");

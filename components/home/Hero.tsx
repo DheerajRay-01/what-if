@@ -1,7 +1,7 @@
 import WhatIfInput from "./WhatIfInput";
 
 interface HeroProps {
-  onSubmit: (content: string) => Promise<boolean>;
+   onSubmit: (content: string) => Promise<boolean>;
   loading: boolean;
 }
 

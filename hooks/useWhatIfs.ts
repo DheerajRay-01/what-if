@@ -7,6 +7,13 @@ export interface WhatIf {
   _id: string;
   content: string;
 
+  authorId: {
+    displayName: string;
+    publicId: string;
+  } | null;
+
+  postId:string;
+
   reactionCounts: {
     funny: number;
     interesting: number;

@@ -1,11 +1,9 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, RefreshCw } from "lucide-react";
-import DetectiveAnimatedCharacter from "@/components/auth/DetectiveAnimatedCharacter";
 import { generateRandomName } from "@/lib/nameGenerator";
 import { useRouter } from "next/navigation";
-
+import AnimatedCharacter from "../animCharacter/AnimatedCharacter";
 
 
 export default function OnboardingPage() {
@@ -132,7 +130,7 @@ const handleContinue = async () => {
     </div>
 
     {/* Detective */}
-    <DetectiveAnimatedCharacter />
+   <AnimatedCharacter path="/animations/detective-search.lottie" />
 
     {/* Name input */}
     <div className="relative mx-auto mt-1 w-full max-w-sm">

@@ -286,9 +286,38 @@ const ReplyItem = ({
 
       <article className="relative z-10 border-2 border-black bg-[#fffdf5] shadow-[4px_4px_0_#000]">
         <div className="px-4 py-3.5 md:px-5 md:py-4">
-          <p className="text-[15px] font-medium leading-snug md:text-base">
-            {reply.content}
-          </p>
+          
+        <p className="text-[15px] font-medium leading-snug md:text-base">
+  {reply.authorId?.displayName && (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        // user posts page later
+      }}
+      className="
+        mr-2
+        font-bold
+        text-foreground
+        underline
+        decoration-dashed
+        underline-offset-4
+        transition-all
+        hover:-rotate-1
+        hover:underline
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-foreground
+        focus-visible:ring-offset-2
+      "
+    >
+      @{reply.authorId.displayName}
+    </button>
+  )}
+
+  {reply.content}
+</p>
+
 
           <button
             type="button"
@@ -409,8 +438,35 @@ const ReplyItem = ({
                   className="border-2 border-black bg-[#fffdf5] px-4 py-3 shadow-[3px_3px_0_#000]"
                 >
                   <p className="text-sm font-medium leading-snug md:text-[15px]">
-                    {childReply.content}
-                  </p>
+  {childReply.authorId?.displayName && (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        // user posts page later
+      }}
+      className="
+        mr-2
+        font-bold
+        text-foreground
+        underline
+        decoration-dashed
+        underline-offset-4
+        transition-all
+        hover:-rotate-1
+        hover:underline
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-foreground
+        focus-visible:ring-offset-2
+      "
+    >
+      @{childReply.authorId.displayName}
+    </button>
+  )}
+
+  {childReply.content}
+</p>
                 </article>
               ))}
 

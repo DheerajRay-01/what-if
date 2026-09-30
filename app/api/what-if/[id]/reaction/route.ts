@@ -5,15 +5,22 @@ import { ApiResponse } from "@/lib/response";
 import { createReactionSchema } from "@/lib/validations";
 import Reaction from "@/models/reactions.model";
 import WhatIf from "@/models/whatif.model";
+import { auth } from "@/auth";
+import User from "@/models/user.model";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.email) {
+      return ApiResponse(false, 401, null, "Unauthorized");
+    }
+
     const { id } = await params;
 
-    // Validate What If ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return ApiResponse(
         false,
@@ -23,18 +30,20 @@ export async function POST(
       );
     }
 
-    // Get reaction type
+    console.log("post",id);
+    
+
     const { searchParams } = new URL(request.url);
     const react = searchParams.get("react");
 
-    // Get visitor ID
-    const visitorId = request.cookies.get("visitorId")?.value;
-
-    // Validate reaction
     const result = createReactionSchema.safeParse({
       reactionType: react,
-      visitorId,
     });
+
+  console.log("hello 1");
+
+  
+    
 
     if (!result.success) {
       return ApiResponse(
@@ -44,18 +53,21 @@ export async function POST(
         result.error.issues[0].message
       );
     }
-
+  console.log("hello 2");
     const { reactionType } = result.data;
 
-    // Check visitor ID
-    if (!visitorId) {
-      return ApiResponse(
-        false,
-        400,
-        null,
-        "Visitor ID not found"
-      );
+    const user = await User.findOne({
+      email: session.user.email,
+      status: "active",
+    }).select("_id");
+
+    if (!user) {
+      return ApiResponse(false, 404, null, "User not found");
     }
+  console.log("hello 3");
+    const authorId = user._id;
+
+    // ...
 
     // Check What If
     const whatIf = await WhatIf.findOne({
@@ -71,10 +83,10 @@ export async function POST(
         "What If not found"
       );
     }
-
+console.log("hello 4");
     // Find existing reaction
     const existingReaction = await Reaction.findOne({
-      visitorId,
+      authorId,
       whatIfId: id,
     });
 
@@ -84,7 +96,7 @@ export async function POST(
     if (!existingReaction) {
       const [, updatedWhatIf] = await Promise.all([
         Reaction.create({
-          visitorId,
+          authorId,
           whatIfId: id,
           reactionType,
         }),

@@ -219,7 +219,7 @@ await navigator.share({
       }}
     >
       {/* Trigger */}
-      <DialogTrigger >
+      <DialogTrigger  >
         <Button
           type="button"
           variant="ghost"

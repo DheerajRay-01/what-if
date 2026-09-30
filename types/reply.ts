@@ -2,11 +2,21 @@ export interface Level1Reply {
   _id: string;
   content: string;
   replyCount: number;
+
+  authorId: {
+    displayName: string;
+    publicId: string;
+  } | null;
 }
 
 export interface Level2Reply {
   _id: string;
   content: string;
+
+  authorId: {
+    displayName: string;
+    publicId: string;
+  } | null;
 }
 
 export interface PaginatedReplies<T> {

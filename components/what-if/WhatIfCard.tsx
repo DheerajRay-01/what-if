@@ -8,6 +8,12 @@ import ReactionBar from "./ReactionBar";
 interface WhatIfCardProps {
   id: string;
   content: string;
+postId:string;
+  author: {
+    displayName: string;
+    publicId: string;
+  } | null;
+
   reactionCounts: {
     funny: number;
     interesting: number;
@@ -23,6 +29,8 @@ interface WhatIfCardProps {
 
 export default function WhatIfCard({
   id,
+  author,
+  postId,
   content,
   reactionCounts,
   replyCount,
@@ -30,8 +38,10 @@ export default function WhatIfCard({
 }: WhatIfCardProps) {
   const router = useRouter();
 
+  
+
   const handleCardClick = () => {
-    router.push(`/what-ifs/${id}`);
+    router.push(`/${postId}`);
   };
 
   const handleCardKeyDown = (
@@ -90,9 +100,48 @@ export default function WhatIfCard({
       >
         {content}
       </p>
+      {/* Author */}
+        {author?.displayName && (
+  <div className="mt-2 flex justify-end">
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        router.push(`/u/${author.publicId}`);
+      }}
+      className="
+        group/author
+        text-sm font-bold
+        text-foreground
+        transition-transform
+        hover:-rotate-1
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-foreground
+        focus-visible:ring-offset-2
+      "
+    >
+      <span className="underline decoration-dashed underline-offset-4">
+        @{author.displayName }
+      </span>
+      <span
+        className="
+          ml-1
+          inline-block
+          text-muted-foreground
+          transition-transform
+          group-hover/author:translate-x-0.5
+          group-hover/author:-translate-y-0.5
+        "
+      >
+        ↗
+      </span>
+    </button>
+  </div>
+)}
 
       {/* Featured Reply */}
-      {/* Featured Reply */}
+
 {featuredReply ? (
   <div
     className="
@@ -225,7 +274,7 @@ export default function WhatIfCard({
                   "
                 />
 
-                <span>SEE THIS NONSENSE →</span>
+                <span>SEE THIS NONSENSE</span>
 
                 <ArrowUpRight
                   size={17}

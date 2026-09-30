@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 interface IWhatIf {
+  authorId: mongoose.Types.ObjectId;
   content: string;
 
   reactionCounts: {
@@ -12,6 +13,8 @@ interface IWhatIf {
 
   replyCount: number;
 
+  postId: string;
+
   featuredReply: mongoose.Types.ObjectId | null;
 
   status: "active" | "deleted";
@@ -19,6 +22,17 @@ interface IWhatIf {
 
 const whatIfSchema = new mongoose.Schema<IWhatIf>(
   {
+    authorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    postId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
     content: {
       type: String,
       required: true,
@@ -64,7 +78,7 @@ const whatIfSchema = new mongoose.Schema<IWhatIf>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 whatIfSchema.index({
@@ -73,7 +87,7 @@ whatIfSchema.index({
 });
 
 const WhatIf =
-  mongoose.models.WhatIf ||
-  mongoose.model<IWhatIf>("WhatIf", whatIfSchema);
+  mongoose.models.WhatIf || mongoose.model<IWhatIf>("WhatIf", whatIfSchema);
 
 export default WhatIf;
+  

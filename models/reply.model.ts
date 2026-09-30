@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 interface IReply {
+  authorId:mongoose.Types.ObjectId;
   whatIfId: mongoose.Types.ObjectId;
   parentId: mongoose.Types.ObjectId | null;
   content: string;
@@ -10,6 +11,12 @@ interface IReply {
 
 const replySchema = new mongoose.Schema<IReply>(
   {
+      authorId:{
+          type:mongoose.Schema.Types.ObjectId,
+          ref:"User",
+          required:true
+        },
+
     whatIfId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "WhatIf",

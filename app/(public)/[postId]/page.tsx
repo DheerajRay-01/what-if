@@ -3,28 +3,17 @@ import type { Metadata } from "next";
 import BackButton from "@/components/home/BackButton";
 import ReplySection from "@/components/what-if/ReplySection";
 import WhatIfDetail from "@/components/what-if/WhatIfDetail";
+import { WhatIf } from "@/types/whatif";
 
 interface PageProps {
   params: Promise<{
-    id: string;
+    postId: string;
   }>;
 }
 
-interface WhatIf {
-  _id: string;
-  content: string;
-  replyCount: number;
-  reactionCounts: {
-    funny: number;
-    interesting: number;
-    crazy: number;
-    build: number;
-  };
-}
-
-const getWhatIf = async (id: string): Promise<WhatIf | null> => {
+const getWhatIf = async (postId: string): Promise<WhatIf | null> => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/what-if/${id}`,
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/what-if/${postId}`,
     {
       cache: "no-store",
     }
@@ -54,9 +43,9 @@ const createDescription = (content: string) => {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { id } = await params;
+  const { postId } = await params;
 
-  const whatIf = await getWhatIf(id);
+  const whatIf = await getWhatIf(postId);
 
   if (!whatIf) {
     return {
@@ -77,7 +66,7 @@ export async function generateMetadata({
 
   const description = createDescription(whatIf.content);
 
-  const url = `https://whatiff.vercel.app/what-if/${id}`;
+  const url = `https://whatiff.vercel.app/what-if/${postId}`;
 
   return {
     title,
@@ -118,9 +107,9 @@ export async function generateMetadata({
 }
 
 const Page = async ({ params }: PageProps) => {
-  const { id } = await params;
+  const { postId } = await params;
 
-  const whatIf = await getWhatIf(id);
+  const whatIf = await getWhatIf(postId);
 
   if (!whatIf) {
     throw new Error("Failed to fetch What If");

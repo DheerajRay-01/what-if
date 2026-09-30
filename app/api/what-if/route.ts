@@ -6,11 +6,23 @@ import Reply from "@/models/reply.model";
 console.log(Reply);
 import mongoose, { Cursor } from "mongoose";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
+import { auth } from "@/auth";
+import User from "@/models/user.model";
+import { customAlphabet } from "nanoid";
 
 
 
 // POST - create a What If
 export async function POST(request: Request) {
+const session = await auth();
+
+console.log("user:",session);
+
+
+if (!session?.user?.email) {
+  return ApiResponse(false, 401, null, "Unauthorized");
+}
+
   try {
     const body = await request.json();
 
@@ -27,9 +39,29 @@ export async function POST(request: Request) {
 
     await connectDB();
 
+    const user = await User.findOne({
+  email: session.user.email,
+  status: "active",
+}).select("_id");
+
+const generatePostId = customAlphabet(
+  "abcdefghijklmnopqrstuvwxyz0123456789",
+  8
+);
+
+const postId = generatePostId();
+
+console.log("postId",postId);
+
+
     const newPost = await WhatIf.create({
       content: result.data.content,
+      authorId: user._id,
+      postId
     });
+
+    console.log(newPost);
+    
 
     // Invalidate cached feed
     revalidateTag("what-if-feed", "max");
@@ -86,6 +118,7 @@ async function getWhatIfs(cursor: string | null) {
     .sort({ _id: -1 })
     .limit(limit + 1)
     .populate("featuredReply", "_id content")
+    .populate("authorId", "_id displayName publicId")
     .lean();
 
 

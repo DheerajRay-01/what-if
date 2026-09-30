@@ -15,7 +15,6 @@ export const createReactionSchema = z.object({
     "crazy",
     "build",
   ]),
-  visitorId: z.string().min(1, "Session ID is required"),
 });
 
 export const createReplySchema = z.object({

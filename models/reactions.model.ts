@@ -1,13 +1,18 @@
 import mongoose from "mongoose";
 
 interface IReaction {
+  authorId: mongoose.Types.ObjectId;
   whatIfId: mongoose.Types.ObjectId;
   reactionType: "funny" | "interesting" | "crazy" | "build";
-  visitorId: string;
 }
 
 const reactionSchema = new mongoose.Schema<IReaction>(
   {
+    authorId:{
+         type:mongoose.Schema.Types.ObjectId,
+         ref:"User",
+         required:true
+    },
     whatIfId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "WhatIf",
@@ -20,10 +25,6 @@ const reactionSchema = new mongoose.Schema<IReaction>(
       required: true,
     },
 
-    visitorId: {
-      type: String,
-      required: true,
-    },
   },
   {
     timestamps: true,

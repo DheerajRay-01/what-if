@@ -8,13 +8,22 @@ import FeedLoadingMessage from "../Skeleton/FeedLoadingMsg";
 interface WhatIf {
   _id: string;
   content: string;
+  postId:string;
+
+  authorId: {
+    displayName: string;
+    publicId: string;
+  } | null;
+
   reactionCounts: {
     funny: number;
     interesting: number;
     crazy: number;
     build: number;
   };
+
   replyCount: number;
+
   featuredReply: {
     _id: string;
     content: string;
@@ -70,14 +79,16 @@ export default function WhatIfFeed({
       {!loading && posts.length > 0 && (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {posts.map((post) => (
-            <WhatIfCard
-              key={post._id}
-              id={post._id}
-              content={post.content}
-              reactionCounts={post.reactionCounts}
-              replyCount={post.replyCount}
-              featuredReply={post.featuredReply}
-            />
+          <WhatIfCard
+             key={post._id}
+             id={post._id}
+             postId={post.postId}
+             content={post.content}
+             author={post.authorId  ?? { displayName: "Unknown", publicId: "" } }
+             reactionCounts={post.reactionCounts}
+             replyCount={post.replyCount}
+             featuredReply={post.featuredReply}
+          />
           ))}
         </div>
       )}
@@ -95,7 +106,7 @@ export default function WhatIfFeed({
       {!loading && posts.length > 0 && (
         <div className="mt-10 flex justify-center">
           <Link
-            href="/what-ifs"
+            href="/whatifs"
             className="
               group
               flex items-center gap-2

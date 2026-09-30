@@ -5,12 +5,9 @@ interface IUser {
   publicId: string;
   name:string;
   authUserId: string;
-
   email: string;
-
-  totalPosts: number;
-  totalReplies: number;
-
+  // totalPosts: number;
+  // totalReplies: number;
   status: "active" | "deleted";
 }
 
@@ -51,17 +48,17 @@ const userSchema = new mongoose.Schema<IUser>(
       index: true,
     },
 
-    totalPosts: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
+    // totalPosts: {
+    //   type: Number,
+    //   default: 0,
+    //   min: 0,
+    // },
 
-    totalReplies: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
+    // totalReplies: {
+    //   type: Number,
+    //   default: 0,
+    //   min: 0,
+    // },
 
     status: {
       type: String,
