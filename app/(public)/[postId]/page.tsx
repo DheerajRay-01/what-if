@@ -12,6 +12,10 @@ interface PageProps {
 }
 
 const getWhatIf = async (postId: string): Promise<WhatIf | null> => {
+
+console.log(postId);
+
+
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_APP_URL}/api/what-if/${postId}`,
     {
@@ -24,6 +28,8 @@ const getWhatIf = async (postId: string): Promise<WhatIf | null> => {
   }
 
   const result = await response.json();
+
+  
 
   if (!result.status || !result.data) {
     return null;

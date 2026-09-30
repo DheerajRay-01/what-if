@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import UserInfoProfileSection from "@/components/profile/UserInfoProfileSection";
 import UserProfileTabs from "@/components/UserProfileTabs";
 import { getCurrentUser } from "@/lib/getCurrentUser";
@@ -10,7 +10,7 @@ export default async function MyProfile() {
   const user = await getCurrentUser();
 
   if (!user) {
-    notFound();
+    redirect("/login");
   }
 
   if (!user) {

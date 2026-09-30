@@ -46,7 +46,7 @@ const handleContinue = async () => {
   try {
     setLoading(true);
 
-    const response = await fetch("/api/user", {
+    const response = await fetch("/api/me", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

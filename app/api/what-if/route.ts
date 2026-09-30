@@ -124,8 +124,28 @@ async function getWhatIfs(cursor: string | null) {
 
 
 const plainPosts = posts.map((post) => ({
-  ...post,
   _id: post._id.toString(),
+
+  postId: post.postId,
+
+  content: post.content,
+
+  authorId: post.authorId
+    ? {
+        _id: post.authorId._id.toString(),
+        displayName: post.authorId.displayName,
+        publicId: post.authorId.publicId,
+      }
+    : null,
+
+  reactionCounts: {
+    funny: post.reactionCounts.funny,
+    interesting: post.reactionCounts.interesting,
+    crazy: post.reactionCounts.crazy,
+    build: post.reactionCounts.build,
+  },
+
+  replyCount: post.replyCount,
 
   featuredReply: post.featuredReply
     ? {
@@ -133,6 +153,8 @@ const plainPosts = posts.map((post) => ({
         content: post.featuredReply.content,
       }
     : null,
+
+  status: post.status,
 
   createdAt: post.createdAt.toISOString(),
   updatedAt: post.updatedAt.toISOString(),

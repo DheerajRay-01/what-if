@@ -1,20 +1,22 @@
 import { connectDB } from "@/lib/connectDB";
 import { ApiResponse } from "@/lib/response";
 import WhatIf from "@/models/whatif.model";
-import mongoose from "mongoose";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const { postId } = await params;
+    const { id } = await params;
 
-    
-    const whatIf = await WhatIf.findOne({postId}).populate("authorId", "_id displayName")
-                            
+    const whatIf = await WhatIf.findOne({
+      postId: id,
+      status: "active",
+    })
+      .populate("authorId", "_id displayName publicId")
+      .lean();
 
     if (!whatIf) {
       return ApiResponse(
@@ -25,10 +27,42 @@ export async function GET(
       );
     }
 
+    const data = {
+      _id: whatIf._id.toString(),
+      postId: whatIf.postId,
+      content: whatIf.content,
+
+      authorId: whatIf.authorId
+        ? {
+            _id: whatIf.authorId._id.toString(),
+            displayName: whatIf.authorId.displayName,
+            publicId: whatIf.authorId.publicId,
+          }
+        : null,
+
+      reactionCounts: {
+        funny: whatIf.reactionCounts.funny,
+        interesting: whatIf.reactionCounts.interesting,
+        crazy: whatIf.reactionCounts.crazy,
+        build: whatIf.reactionCounts.build,
+      },
+
+      replyCount: whatIf.replyCount,
+
+      featuredReply: whatIf.featuredReply
+        ? whatIf.featuredReply.toString()
+        : null,
+
+      status: whatIf.status,
+
+      createdAt: whatIf.createdAt.toISOString(),
+      updatedAt: whatIf.updatedAt.toISOString(),
+    };
+
     return ApiResponse(
       true,
       200,
-      whatIf,
+      data,
       "What If fetched successfully"
     );
   } catch (error) {
