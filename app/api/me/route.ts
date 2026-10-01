@@ -4,6 +4,7 @@ import { generatePublicId } from "@/lib/generatePublicID";
 import { ApiResponse } from "@/lib/response";
 import User from "@/models/user.model";
 
+
 export  async function GET(request:Request) {
 
   const session  = await auth()

@@ -1,20 +1,26 @@
-import { Loader2 } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import UserProfileReplyCard from './UserProfileReplyCard';
+"use client";
 
+import { Loader2 } from "lucide-react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import UserProfileReplyCard from "./UserProfileReplyCard";
 
 interface ReplyItem {
   _id: string;
   content: string;
-  createdAt: string; 
-  whatIfId: { 
-    _id: string; 
-    content: string; 
-    postId:string;
-  }; 
-  parentId: { 
-    _id: string; 
-    content: string; 
+  createdAt: string;
+  whatIfId: {
+    _id: string;
+    content: string;
+    postId: string;
+  };
+  parentId: {
+    _id: string;
+    content: string;
   } | null;
 }
 
@@ -28,11 +34,8 @@ interface UserReplyResponse {
 }
 
 const UserProfileReplySection = () => {
-
   const [replies, setReplies] = useState<ReplyItem[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(
-    null
-  );
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
   const [loading, setLoading] = useState(true);
@@ -41,7 +44,7 @@ const UserProfileReplySection = () => {
 
   const observerRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchPosts = useCallback(
+  const fetchReplies = useCallback(
     async (cursor?: string | null) => {
       try {
         if (cursor) {
@@ -57,34 +60,24 @@ const UserProfileReplySection = () => {
 
         const response = await fetch(url);
 
-        
-        
+        const result: UserReplyResponse = await response.json();
 
-        const result: UserReplyResponse =
-          await response.json();
-
-          console.log("response",result);
         if (!response.ok || !result.status) {
-          throw new Error(
-            "Failed to fetch user's What Ifs"
-          );
+          throw new Error("Failed to fetch user's replies");
         }
 
-        const newPosts = result.data.replies;
+        const newReplies = result.data.replies;
 
         if (cursor) {
-          setReplies((prev) => [...prev, ...newPosts]);
+          setReplies((prev) => [...prev, ...newReplies]);
         } else {
-          setReplies(newPosts);
+          setReplies(newReplies);
         }
 
         setNextCursor(result.data.nextCursor);
         setHasMore(result.data.hasMore);
       } catch (error) {
-        console.error(
-          "Failed to fetch user's What Ifs:",
-          error
-        );
+        console.error("Failed to fetch user's replies:", error);
 
         if (!cursor) {
           setError(true);
@@ -97,15 +90,10 @@ const UserProfileReplySection = () => {
     []
   );
 
-  // Initial fetch / endpoint change
+  // Initial fetch
   useEffect(() => {
-    setReplies([]);
-    setNextCursor(null);
-    setHasMore(true);
-    setError(false);
-
-    fetchPosts();
-  }, [fetchPosts]);
+    fetchReplies();
+  }, [fetchReplies]);
 
   // Infinite scroll
   useEffect(() => {
@@ -124,7 +112,7 @@ const UserProfileReplySection = () => {
           nextCursor &&
           !loadingMore
         ) {
-          fetchPosts(nextCursor);
+          fetchReplies(nextCursor);
         }
       },
       {
@@ -142,58 +130,52 @@ const UserProfileReplySection = () => {
     hasMore,
     loading,
     loadingMore,
-    fetchPosts,
+    fetchReplies,
   ]);
 
-console.log(replies);
-
-
-
   return (
-     <section>
-        <div className="space-y-5">
-          {replies.map((reply) => (
-             <UserProfileReplyCard
-                key={reply._id}
-                reply={reply}
+    <section>
+      <div className="space-y-5">
+        {replies.map((reply) => (
+          <UserProfileReplyCard
+            key={reply._id}
+            reply={reply}
+          />
+        ))}
+      </div>
+
+      {/* Infinite scroll trigger */}
+      {hasMore && (
+        <div
+          ref={observerRef}
+          className="flex min-h-20 items-center justify-center"
+          aria-hidden="true"
+        >
+          {loadingMore && (
+            <div className="flex items-center gap-2">
+              <Loader2
+                size={18}
+                className="animate-spin"
               />
-          ))}
+
+              <span className="text-xs font-bold uppercase">
+                Loading more nonsense...
+              </span>
+            </div>
+          )}
         </div>
-  
-        {/* Infinite scroll trigger */}
-        {hasMore && (
-          <div
-            ref={observerRef}
-            className="flex min-h-20 items-center justify-center"
-            aria-hidden="true"
-          >
-            {loadingMore && (
-              <div className="flex items-center gap-2">
-                <Loader2
-                  size={18}
-                  className="animate-spin"
-                />
-  
-                <span className="text-xs font-bold uppercase">
-                  Loading more nonsense...
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-  
-        {/* End */}
-        {!hasMore && replies.length > 0 && (
-          <div className="py-8 text-center">
-            <span className="text-xs font-bold text-muted-foreground">
-              — that's all the nonsense for now —
-            </span>
-          </div>
-        )}
-      </section>
+      )}
 
+      {/* End */}
+      {!hasMore && replies.length > 0 && (
+        <div className="py-8 text-center">
+          <span className="text-xs font-bold text-muted-foreground">
+            — that's all the nonsense for now —
+          </span>
+        </div>
+      )}
+    </section>
+  );
+};
 
-  )
-}
-
-export default UserProfileReplySection
+export default UserProfileReplySection;

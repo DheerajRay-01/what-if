@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 
 
 
+
 export async function GET(request: Request) {
   try {
     const session = await auth();

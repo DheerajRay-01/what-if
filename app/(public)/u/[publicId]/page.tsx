@@ -1,6 +1,7 @@
 import UserInfoProfileSection from "@/components/profile/UserInfoProfileSection";
 import UserWhatIfs from "@/components/profile/UserWhatIfs";
 import { notFound } from "next/navigation";
+export const instant = false;
 
 interface PublicUserPageProps {
   params: Promise<{
@@ -20,7 +21,7 @@ export default async function PublicUserPage({
   const userResponse = await fetch(
     `${baseUrl}/api/u/${publicId}`,
     {
-      cache: "no-store",
+      cache: "force-cache",
     }
   );
 
