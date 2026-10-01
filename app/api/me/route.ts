@@ -8,7 +8,7 @@ import User from "@/models/user.model";
 export  async function GET(request:Request) {
 
   const session  = await auth()
-  console.log(session);
+
 
   if(!session?.user){
      return ApiResponse(false, 401, null, "Unauthorized");
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   try {
     const session = await auth();
 
-    console.log("session : ",session);
+
     
 
     if (!session?.user?.id || !session.user.email) {

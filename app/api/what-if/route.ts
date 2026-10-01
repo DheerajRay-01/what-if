@@ -16,7 +16,6 @@ import { customAlphabet } from "nanoid";
 export async function POST(request: Request) {
 const session = await auth();
 
-console.log("user:",session);
 
 
 if (!session?.user?.email) {
@@ -51,8 +50,6 @@ const generatePostId = customAlphabet(
 
 const postId = generatePostId();
 
-console.log("postId",postId);
-
 
     const newPost = await WhatIf.create({
       content: result.data.content,
@@ -60,7 +57,6 @@ console.log("postId",postId);
       postId
     });
 
-    console.log(newPost);
     
 
     // Invalidate cached feed
@@ -93,8 +89,6 @@ async function getWhatIfs(cursor: string | null) {
   cacheTag("what-if-feed");
 
   await connectDB();
-
-  console.log("Reply model:", mongoose.models.Reply);
 
   const limit = 10;
 

@@ -26,8 +26,6 @@ export async function GET(
       return ApiResponse(false, 404, null, "User not found");
     }
 
-    console.log("user Profile:",user);
-    
 
     return ApiResponse(
       true,

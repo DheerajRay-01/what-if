@@ -82,7 +82,7 @@ export async function GET(request: Request) {
       .populate("parentId", "content")
       .lean();
 
-      console.log(replies);
+   
       
 
     const hasMore = replies.length > limit;
